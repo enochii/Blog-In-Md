@@ -141,7 +141,7 @@ sp-cdn : "L5Z9:CN"
 
 最后，放下今天边摸🐟边配JavaEE环境偶尔爬数据的微薄成果：
 
-<img src="D:\mygarbagecode\BlogInMD\Web\result.png" alt="result" style="zoom:67%;" />
+<img src="img/result.png" alt="result" style="zoom:67%;" />
 
 
 
