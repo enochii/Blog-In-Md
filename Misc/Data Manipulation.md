@@ -8,9 +8,13 @@
 
 转Stream后使用一次就会失效。
 
+`flatMap`
+
+>http://dblab.xmu.edu.cn/blog/961-2/ 
+
 用`flatMap`可以伪造`join`
 
-> http://dblab.xmu.edu.cn/blog/961-2/ 
+> 去水了下SO：https://stackoverflow.com/a/59243531/10701129
 
 
 
@@ -95,3 +99,15 @@ for index, row in traj.iterrows():
 ```
 
 用`zip`转一下，另外最后传成`json`，zip好像因为内部用了`yield`的原因不是可序列化的，做一下list转换（及时求值？）就ok了。
+
+
+
+> https://stackoverflow.com/questions/27370731/pandas-how-to-generate-multiple-rows-by-one-row/59288941#59288941 
+>
+> https://stackoverflow.com/a/59288941/10701129
+>
+> 感觉上一个问题也可以用`stack()`来做，找时间康康--
+
+
+
+pandas读取`csv`文件显示`MemoryError`，看了一圈好像是内存占用过大，尝试指定`chunksize`要搞一堆神奇的操作，遂删除了一些无用的列，问题解决。
