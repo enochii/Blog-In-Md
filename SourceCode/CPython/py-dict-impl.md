@@ -18,7 +18,7 @@ Python的`dict`实现事实上就是做了一个hash table，STL的`map`则大�
 
 PyDictKeyEntry代表字典中的一个entry，其定义如下
 
-````c
+```c
 typedef struct {
     /* Cached hash code of me_key. */
     Py_hash_t me_hash;
