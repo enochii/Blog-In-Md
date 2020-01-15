@@ -316,7 +316,7 @@ usable = USABLE_FRACTION(size);
 #define USABLE_FRACTION(n) (((n) << 1)/3)
 ```
 
-事实上就是2/3*size，在申请前面我们提到的柔性数组内存时，总共有三部分，`PyObjectsObject`结构体（定长）以及后面的柔性数组（包括索引数组和entry数组）。
+事实上就是2/3*size，在申请一个`PyDictKeysObject`的内存时，总共有三部分，`PyObjectsObject`结构体（定长）以及后面的柔性数组（包括索引数组和entry数组）。
 
 ```c
 dk = PyObject_MALLOC(sizeof(PyDictKeysObject)
@@ -555,7 +555,7 @@ Fail:
 }
 ```
 
-插入值分两种情况：
+intersect会先调用`dk_lookup`（可以认为就是前面提到的`lookdict`），然后进行插值。插入值根据搜索的结果有两种情况：
 
 - key值未使用过
 - key值已使用过
