@@ -1,5 +1,9 @@
 ### 分支
 
+[TOC]
+
+这部分主要是探究虚拟机中分支控制流的实现，给出下面代码
+
 ```python
 a = 1
 
@@ -9,7 +13,7 @@ else:
     print("xixixi")
 ```
 
-字节码如下：
+使用之前的工具（[py3-vm-baby-step.md](./py3-vm-baby-step.md)），获得字节码如下：
 
 ```shell
   1           0 LOAD_CONST               0 (1) 
@@ -132,7 +136,7 @@ TARGET(COMPARE_OP) {
 
 ##### 比较动作的执行者——cmp_outcome
 
-接着虚拟机会调用`cmp_outcome`，其定义如下：
+获得需要进行比较的两个参数后，接着虚拟机会调用`cmp_outcome`，其定义如下：
 
 ```c
 static PyObject *
@@ -204,7 +208,7 @@ return v;
 #define Py_True ((PyObject *) &_Py_TrueStruct)
 ```
 
-事实上Python的布尔值是用long的0 1实现的：
+事实上Python的布尔值是用long的0 1实现的，其实`Py_True`和`Py_True`都是全局的单例对象。：
 
 ```c
 /* The objects representing bool values False and True */
@@ -220,8 +224,6 @@ struct _longobject _Py_TrueStruct = {
 };
 
 ```
-
-并且这里的`Py_True`和`Py_True`都是全局的单例对象。
 
 ##### "可有可无"的PREDICT
 
@@ -310,6 +312,20 @@ PRED_POP_JUMP_IF_FALSE:
 之前我们在`cmp_outcome`函数中将比较的结果放在了栈顶，这里pop出该结果`cond`，并进行逻辑的分发。当结果为true时，减少`cond`的引用计数并进行`FAST_DISPATCH`；当结果为false时，还会多做一个`JUMPTO(oparg)`的操作：
 
 ```c
+if (cond == Py_True) {
+        Py_DECREF(cond);
+        FAST_DISPATCH();
+    }
+    if (cond == Py_False) {
+        Py_DECREF(cond);
+        JUMPTO(oparg);
+        FAST_DISPATCH();
+    }
+```
+
+`JUMP_TO`定义如下：
+
+```c
 #define JUMPTO(x)       (next_instr = first_instr + (x) / sizeof(_Py_CODEUNIT))
 ```
 
@@ -379,7 +395,7 @@ DISPATCH();
 当比较结果为真时，控制流会顺序执行字节码：
 
 ```c
-3           4 LOAD_NAME                0 (a) 
+  3           4 LOAD_NAME                0 (a) 
               6 LOAD_CONST               1 (10)
               8 COMPARE_OP               4 (>)
              10 POP_JUMP_IF_FALSE       22

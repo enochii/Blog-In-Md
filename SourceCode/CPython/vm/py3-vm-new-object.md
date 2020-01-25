@@ -1,5 +1,7 @@
 ### 对象创建
 
+[TOC]
+
 字节码的解析逻辑事实上大部分都是在`_PyEval_EvalFrameDefault`这个函数中实现的，无特殊说明，以下代码均摘自`_PyEval_EvalFrameDefault`。
 
 #### 简单对象创建
@@ -43,11 +45,11 @@ d = {}
 
 ```c
 TARGET(LOAD_CONST) {
-            PyObject *value = GETITEM(consts, oparg);
-            Py_INCREF(value);
-            PUSH(value);
-            FAST_DISPATCH();
-        }
+    PyObject *value = GETITEM(consts, oparg);
+    Py_INCREF(value);
+    PUSH(value);
+    FAST_DISPATCH();
+}
 ```
 
 `LOAD_CONST`执行的动作实际上就是从`consts`常量表中取出`oparg`(0)对应的常量(1)，接着增加其引用计数并压栈，执行下一条指令。
@@ -67,25 +69,25 @@ TARGET(LOAD_CONST) {
 
 ```c
 TARGET(STORE_NAME) {
-            PyObject *name = GETITEM(names, oparg);
-            PyObject *v = POP();
-            PyObject *ns = f->f_locals;
-            int err;
-            if (ns == NULL) {
-                PyErr_Format(PyExc_SystemError,
-                             "no locals found when storing %R", name);
-                Py_DECREF(v);
-                goto error;
-            }
-            if (PyDict_CheckExact(ns))
-                err = PyDict_SetItem(ns, name, v);
-            else
-                err = PyObject_SetItem(ns, name, v);
-            Py_DECREF(v);
-            if (err != 0)
-                goto error;
-            DISPATCH();
-        }
+    PyObject *name = GETITEM(names, oparg);
+    PyObject *v = POP();
+    PyObject *ns = f->f_locals;
+    int err;
+    if (ns == NULL) {
+        PyErr_Format(PyExc_SystemError,
+                     "no locals found when storing %R", name);
+        Py_DECREF(v);
+        goto error;
+    }
+    if (PyDict_CheckExact(ns))
+        err = PyDict_SetItem(ns, name, v);
+    else
+        err = PyObject_SetItem(ns, name, v);
+    Py_DECREF(v);
+    if (err != 0)
+        goto error;
+    DISPATCH();
+}
 ```
 
 先是在符号表中根据`oparg`拿出对应的`name`，把该键值对存储进当前栈帧`f`的`f_locals`命名空间中。
@@ -119,8 +121,8 @@ if(_Py_atomic_load_relaxed(&_PyRuntime.ceval.eval_breaker))		{
 最后两行的
 
 ```shell
-			 16 LOAD_CONST               2 (None)
-             18 RETURN_VALUE
+            16 LOAD_CONST               2 (None)
+            18 RETURN_VALUE
 ```
 
 > Python执行一段Code Block后，一定要返回一些值，这里入栈的事实上是一个None值
@@ -195,20 +197,21 @@ TARGET(BUILD_CONST_KEY_MAP) {
 ```c
 	PyObject *keys = TOP();
 	if (!PyTuple_CheckExact(keys) ||
-            PyTuple_GET_SIZE(keys) != (Py_ssize_t)oparg)		{
+            PyTuple_GET_SIZE(keys) != (Py_ssize_t)oparg)
+    {
         PyErr_SetString(PyExc_SystemError,
                           "bad BUILD_CONST_KEY_MAP keys argument");
         goto error;
     }
 ```
 
-其中`oparg`为BUILD_MAP的参数（也就是初始化时地键值对数），通过循环取出对应的键值对，调用`PyDict_SetItem`将其加入新建的字典。其中`PEEK`宏用于取出value值：
+其中`oparg`为BUILD_MAP的参数（也就是初始化一个字典时，键值对的数量），通过循环取出对应的键值对，调用`PyDict_SetItem`将其加入新建的字典。其中`PEEK`宏用于取出value值：
 
 ```C
 #define PEEK(n)           (stack_pointer[-(n)])
 ```
 
-`BUILD_LIST`逻辑类似，以下为对应代码：
+`BUILD_LIST`逻辑类似且相对简单，在此不再细究，以下为对应代码：
 
 ```c
 TARGET(BUILD_LIST) {
