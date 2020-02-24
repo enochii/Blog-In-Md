@@ -10,13 +10,13 @@
 
 简单来说，一个 thread 在对一个 object 进行修改比如增减引用计数时需要 hold GIL。
 
-这里也有个[有趣的问题]( https://stackoverflow.com/questions/26873512/why-does-python-provide-locking-mechanisms-if-its-subject-to-a-gil )，就是说为什么有了 GIL ，但 Python 还是会出现 data race 的现象。正如[轮子哥所说]( Python有GIL为什么还需要线程同步？ - vczh的回答 - 知乎 https://www.zhihu.com/question/23030421/answer/23475843 )：
+这里也有个[有趣的问题]( https://stackoverflow.com/questions/26873512/why-does-python-provide-locking-mechanisms-if-its-subject-to-a-gil )，就是说为什么有了 GIL ，但 Python 还是会出现 data race 的现象。正如[轮子哥所说](https://www.zhihu.com/question/23030421/answer/23475843)：
 
 > GIL也只是相当于古时候单核CPU通过不断的分配时间片来模拟多线程的方法而已，为什么那个时候写多线程也要用锁？ 
 
 GIL 只能保证一条字节码的执行是原子的，而一些操作比如自增需要好几条字节码，故而会出现 data race 的现象。
 
-> TLS TSS
+##### TLS TSS
 >
 >  https://docs.python.org/3.7/c-api/init.html?highlight=gil#thread-specific-storage-tss-api 
 >
